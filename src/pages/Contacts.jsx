@@ -38,7 +38,13 @@ export default function Contacts() {
       const params = { limit: PAGE_SIZE, offset: append ? contactsRef.current.length : 0 };
       if (qDebounced.trim()) params.q = qDebounced.trim();
       const data = await listContacts(params);
-      const rows = data.contacts || data || [];
+      // The backend's GET /api/crm/contacts returns the page under `results`
+      // (app/routes/crm.py's list_contacts), not `contacts` -- this previously
+      // fell through to `data` itself (a truthy object, not an array), so
+      // `contacts.map()` below threw a TypeError on every load with no error
+      // boundary to catch it, blanking the whole app to a white screen
+      // (AI-A task #400, 2026-10-23).
+      const rows = Array.isArray(data.results) ? data.results : [];
       setContacts((prev) => (append ? [...prev, ...rows] : rows));
       setTotal(data.total ?? rows.length);
     } catch {

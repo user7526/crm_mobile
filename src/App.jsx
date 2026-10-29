@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { fetchMe, logout as apiLogout, getAiwLoginUrl, tryRefresh } from './api/auth';
 import AppShell from './AppShell';
+import { MessagingProvider } from './contexts/MessagingContext';
 
 const theme = createTheme({
   palette: { mode: 'light', background: { default: '#ffffff', paper: '#f6f8f7' }, primary: { main: '#0f766e' } },
@@ -48,9 +49,11 @@ export default function App() {
       <CssBaseline />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/*" element={<AppShell />} />
-          </Routes>
+          <MessagingProvider>
+            <Routes>
+              <Route path="/*" element={<AppShell />} />
+            </Routes>
+          </MessagingProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

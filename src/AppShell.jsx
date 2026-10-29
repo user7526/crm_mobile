@@ -1,23 +1,31 @@
 import React from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, IconButton, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, IconButton, BottomNavigation, BottomNavigationAction, Paper, Badge } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import ForumIcon from '@mui/icons-material/Forum';
 import { useAuth } from './App';
 import { colors as c } from './theme';
+import { useMessaging } from './contexts/MessagingContext';
 import Parties from './pages/Parties';
 import PartyDetail from './pages/PartyDetail';
 import Contacts from './pages/Contacts';
 import Tasks from './pages/Tasks';
 import Import from './pages/Import';
+import BakkenWatch from './pages/BakkenWatch';
+import ChatList from './pages/ChatList';
+import ChatThread from './pages/ChatThread';
 
 const TABS = [
   { path: '/', label: 'Parties', icon: <BusinessIcon /> },
   { path: '/contacts', label: 'Contacts', icon: <PeopleAltIcon /> },
   { path: '/tasks', label: 'Tasks', icon: <AssignmentIcon /> },
+  { path: '/chat', label: 'Chat', icon: <ForumIcon /> },
+  { path: '/bakken-watch', label: 'Bakken Watch', icon: <TravelExploreIcon /> },
   { path: '/import', label: 'Import', icon: <UploadFileIcon /> },
 ];
 
@@ -25,6 +33,7 @@ export default function AppShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { totalUnread } = useMessaging();
 
   // Bottom nav highlights by top-level path; party detail (/parties/:id)
   // still highlights the Parties tab since it's a drill-down from there.
@@ -59,6 +68,9 @@ export default function AppShell() {
           <Route path="parties/:partyId" element={<PartyDetail />} />
           <Route path="contacts" element={<Contacts />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="chat" element={<ChatList />} />
+          <Route path="chat/:conversationId" element={<ChatThread />} />
+          <Route path="bakken-watch" element={<BakkenWatch />} />
           <Route path="import" element={<Import />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -74,7 +86,13 @@ export default function AppShell() {
           }}
         >
           {TABS.map((t) => (
-            <BottomNavigationAction key={t.path} label={t.label} icon={t.icon} />
+            <BottomNavigationAction
+              key={t.path}
+              label={t.label}
+              icon={t.path === '/chat' ? (
+                <Badge color="error" badgeContent={totalUnread} max={99}>{t.icon}</Badge>
+              ) : t.icon}
+            />
           ))}
         </BottomNavigation>
       </Paper>

@@ -82,3 +82,46 @@ export async function commitChatGptImport(csvText, rowOverrides = []) {
   });
   return asJson(res);
 }
+
+// --- Bakken Watch (AI-A task #400, 2026-10-23) -- mirrors
+// ai_ui_react/src/pages/CrmBakkenWatch.js's API calls one-for-one. ---
+
+export async function listAiProposals(showAllStatuses = false) {
+  const qs = showAllStatuses ? '' : '?status=pending';
+  const res = await authFetch(`${API_BASE_URL}/api/crm/ai-proposals${qs}`, NO_STORE);
+  return asJson(res);
+}
+
+export async function approveAiProposal(id) {
+  const res = await authFetch(`${API_BASE_URL}/api/crm/ai-proposals/${id}/approve`, { method: 'POST' });
+  return asJson(res);
+}
+
+export async function rejectAiProposal(id, reason) {
+  const res = await authFetch(`${API_BASE_URL}/api/crm/ai-proposals/${id}/reject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason: reason || null }),
+  });
+  return asJson(res);
+}
+
+export async function updateAiProposal(id, toolArgs) {
+  const res = await authFetch(`${API_BASE_URL}/api/crm/ai-proposals/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tool_args: toolArgs }),
+  });
+  return asJson(res);
+}
+
+export async function listReferenceMaterials(params = {}) {
+  const qs = new URLSearchParams(params);
+  const res = await authFetch(`${API_BASE_URL}/api/crm/reference-materials?${qs}`, NO_STORE);
+  return asJson(res);
+}
+
+export async function getBakkenWatchCandidates(runId) {
+  const res = await authFetch(`${API_BASE_URL}/api/crm/bakken-watch/candidates/${runId}`, NO_STORE);
+  return asJson(res);
+}

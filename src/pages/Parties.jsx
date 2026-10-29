@@ -10,13 +10,31 @@ import { listParties } from '../api/crmApi';
 import { colors as c } from '../theme';
 import PhoneLink from '../components/PhoneLink';
 
+// Mirrors desktop's ROLE_OPTIONS (ai_ui_react/src/pages/CrmParties.js) --
+// this list only had 5 of the 13 real role values until AI-A task #400
+// (2026-10-23), so most parties (service providers, importers, mills,
+// exporters, projects, events, etc.) simply couldn't be filtered to on
+// mobile. 'Prospect' is kept as an extra convenience umbrella on top of
+// desktop's list (not present there as its own filter entry) -- the
+// backend already treats role=prospect specially (app/routes/crm.py,
+// PROSPECT_ROLES), matching any of the *_prospect roles at once.
 const ROLE_OPTIONS = [
   { value: '', label: 'All roles' },
   { value: 'customer', label: 'Customer' },
-  { value: 'end_user', label: 'End user' },
+  { value: 'end_user', label: 'End user / producer' },
+  { value: 'service_provider', label: 'Service Provider' },
   { value: 'vendor', label: 'Vendor' },
-  { value: 'prospect', label: 'Prospect' },
+  { value: 'prospect', label: 'Prospect (any)' },
+  { value: 'vendor_prospect', label: 'Vendor prospect' },
+  { value: 'importer', label: 'Importer' },
+  { value: 'importer_prospect', label: 'Importer prospect' },
+  { value: 'mill', label: 'Mill' },
+  { value: 'mill_prospect', label: 'Mill prospect' },
+  { value: 'exporter_prospect', label: 'Exporter prospect' },
   { value: 'competitor', label: 'Competitor' },
+  { value: 'other', label: 'Other' },
+  { value: 'project', label: 'Project' },
+  { value: 'event', label: 'Event' },
 ];
 
 const PAGE_SIZE = 50;
