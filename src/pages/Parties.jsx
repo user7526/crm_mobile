@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { listParties } from '../api/crmApi';
 import { colors as c } from '../theme';
 import PhoneLink from '../components/PhoneLink';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 // Mirrors desktop's ROLE_OPTIONS (ai_ui_react/src/pages/CrmParties.js) --
 // this list only had 5 of the 13 real role values until AI-A task #400
@@ -41,6 +42,7 @@ const PAGE_SIZE = 50;
 
 export default function Parties() {
   const navigate = useNavigate();
+  const { fsPx } = useFontSize();
   const [q, setQ] = useState('');
   const [qDebounced, setQDebounced] = useState('');
   const debounceRef = useRef(null);
@@ -127,10 +129,10 @@ export default function Parties() {
                     <Box sx={{ mt: 0.5, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                       <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                         {(p.roles || []).map((r) => (
-                          <Chip key={r} size="small" label={r.replace(/_/g, ' ')} variant="outlined" sx={{ height: 20, fontSize: 11 }} />
+                          <Chip key={r} size="small" label={r.replace(/_/g, ' ')} variant="outlined" sx={{ height: 20, fontSize: fsPx(11) }} />
                         ))}
                       </Box>
-                      {p.phone_main && <PhoneLink value={p.phone_main} sx={{ fontSize: 13 }} />}
+                      {p.phone_main && <PhoneLink value={p.phone_main} sx={{ fontSize: fsPx(13) }} />}
                       {p.location && <Typography variant="caption" sx={{ color: c.muted }}>{p.location}</Typography>}
                     </Box>
                   }

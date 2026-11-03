@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { previewChatGptImport, commitChatGptImport } from '../api/crmApi';
 import { colors as c } from '../theme';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 // Kept in sync by hand with ai_ui_react/src/pages/CrmChatGptImport.js's
 // CHATGPT_IMPORT_FORMAT_INSTRUCTIONS -- same format string, same backend
@@ -56,6 +57,7 @@ const ACTION_COLOR = {
 };
 
 export default function Import() {
+  const { fsPx } = useFontSize();
   const [csvText, setCsvText] = useState('');
   const [previewing, setPreviewing] = useState(false);
   const [committing, setCommitting] = useState(false);
@@ -121,7 +123,7 @@ export default function Import() {
             </Tooltip>
           </Box>
           <Box component="pre" sx={{
-            whiteSpace: 'pre-wrap', fontSize: 11, fontFamily: 'monospace',
+            whiteSpace: 'pre-wrap', fontSize: fsPx(11), fontFamily: 'monospace',
             bgcolor: c.surface, p: 1.25, borderRadius: 1, m: 0,
           }}>
             {CHATGPT_IMPORT_FORMAT_INSTRUCTIONS}
@@ -135,7 +137,7 @@ export default function Import() {
           placeholder="Paste CSV text here..."
           value={csvText}
           onChange={(e) => { setCsvText(e.target.value); setPreview(null); setCommitted(null); }}
-          sx={{ mb: 1, '& textarea': { fontFamily: 'monospace', fontSize: 12 } }}
+          sx={{ mb: 1, '& textarea': { fontFamily: 'monospace', fontSize: fsPx(12) } }}
         />
         <Button size="small" variant="outlined" onClick={runPreview} disabled={previewing} fullWidth sx={{ mb: 1 }}>
           {previewing ? <CircularProgress size={18} /> : 'Preview'}
@@ -157,7 +159,7 @@ export default function Import() {
           ))}
           {resultRows.map((r) => (
             <Paper key={r.row_index} variant="outlined" sx={{ p: 1, mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Chip size="small" label={r.action} color={ACTION_COLOR[r.action] || 'default'} variant="outlined" sx={{ height: 20, fontSize: 11 }} />
+              <Chip size="small" label={r.action} color={ACTION_COLOR[r.action] || 'default'} variant="outlined" sx={{ height: 20, fontSize: fsPx(11) }} />
               <Typography variant="body2" sx={{ flex: 1 }}>{r.name || r.subject}</Typography>
             </Paper>
           ))}

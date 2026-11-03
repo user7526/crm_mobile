@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { colors as c } from '../theme';
 import { useMessaging } from '../contexts/MessagingContext';
 import messagingApi from '../api/messagingApi';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 function initials(name) {
   if (!name) return '?';
@@ -29,6 +30,7 @@ function formatTime(ts) {
 
 export default function ChatList() {
   const navigate = useNavigate();
+  const { fsPx } = useFontSize();
   const { conversations, loadingConversations, refreshConversations, onlineUserIds, currentUserId } = useMessaging();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [users, setUsers] = useState([]);
@@ -77,8 +79,8 @@ export default function ChatList() {
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress size={28} /></Box>
         ) : conversations.length === 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.6, p: 2 }}>
-            <ForumIcon sx={{ fontSize: 36, color: c.muted, mb: 1 }} />
-            <Typography sx={{ color: c.muted, fontSize: 13, textAlign: 'center' }}>
+            <ForumIcon sx={{ fontSize: fsPx(36), color: c.muted, mb: 1 }} />
+            <Typography sx={{ color: c.muted, fontSize: fsPx(13), textAlign: 'center' }}>
               No conversations yet. Tap + to start one.
             </Typography>
           </Box>
@@ -100,21 +102,21 @@ export default function ChatList() {
                       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                       sx={{ '& .MuiBadge-dot': { bgcolor: online ? '#4caf50' : c.border } }}
                     >
-                      <Avatar sx={{ width: 36, height: 36, fontSize: 14, bgcolor: c.primary }}>{initials(cv.title)}</Avatar>
+                      <Avatar sx={{ width: 36, height: 36, fontSize: fsPx(14), bgcolor: c.primary }}>{initials(cv.title)}</Avatar>
                     </Badge>
                   </ListItemAvatar>
                   <ListItemText
                     primary={cv.title}
                     secondary={preview}
                     primaryTypographyProps={{ fontWeight: cv.unread_count ? 700 : 500, noWrap: true }}
-                    secondaryTypographyProps={{ fontSize: 12, noWrap: true, sx: { color: c.muted } }}
+                    secondaryTypographyProps={{ fontSize: fsPx(12), noWrap: true, sx: { color: c.muted } }}
                   />
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', ml: 1, minWidth: 36 }}>
-                    <Typography sx={{ fontSize: 10, color: c.muted }}>
+                    <Typography sx={{ fontSize: fsPx(10), color: c.muted }}>
                       {formatTime(cv.last_message?.created_at || cv.last_message_at)}
                     </Typography>
                     {cv.unread_count > 0 && (
-                      <Box sx={{ mt: 0.5, bgcolor: c.primary, color: '#fff', borderRadius: 8, px: 0.75, fontSize: 11, fontWeight: 700, lineHeight: '18px', minWidth: 18, textAlign: 'center' }}>
+                      <Box sx={{ mt: 0.5, bgcolor: c.primary, color: '#fff', borderRadius: 8, px: 0.75, fontSize: fsPx(11), fontWeight: 700, lineHeight: '18px', minWidth: 18, textAlign: 'center' }}>
                         {cv.unread_count}
                       </Box>
                     )}
@@ -139,7 +141,7 @@ export default function ChatList() {
             {filteredUsers.map((u) => (
               <ListItemButton key={u.user_id} disabled={creating} onClick={() => startChat(u.user_id)}>
                 <ListItemAvatar>
-                  <Avatar sx={{ width: 32, height: 32, fontSize: 13, bgcolor: c.primary }}>{initials(u.name || u.email)}</Avatar>
+                  <Avatar sx={{ width: 32, height: 32, fontSize: fsPx(13), bgcolor: c.primary }}>{initials(u.name || u.email)}</Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={u.name || u.email} secondary={u.name ? u.email : null} />
               </ListItemButton>

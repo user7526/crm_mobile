@@ -1,14 +1,22 @@
-import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import React, { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { fetchMe, logout as apiLogout, getAiwLoginUrl, tryRefresh } from './api/auth';
 import AppShell from './AppShell';
 import { MessagingProvider } from './contexts/MessagingContext';
+import { FontSizeProvider, useFontSize } from './contexts/FontSizeContext';
 
-const theme = createTheme({
-  palette: { mode: 'light', background: { default: '#ffffff', paper: '#f6f8f7' }, primary: { main: '#0f766e' } },
-});
+// `fontSize` feeds MUI's typography.fontSize -- the whole rem-based type
+// scale re-scales off this single number. Controlled via the Settings page
+// (see FontSizeContext + Settings.jsx), same pattern as tdw_email/
+// ai_assistant's font size setting (requested 2026-11-03).
+function getTheme(fontSize = 14) {
+  return createTheme({
+    palette: { mode: 'light', background: { default: '#ffffff', paper: '#f6f8f7' }, primary: { main: '#0f766e' } },
+    typography: { fontSize },
+  });
+}
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -43,7 +51,9 @@ function AuthProvider({ children }) {
   return <AuthContext.Provider value={{ user, logout }}>{children}</AuthContext.Provider>;
 }
 
-export default function App() {
+function ThemedApp() {
+  const { fontSize } = useFontSize();
+  const theme = useMemo(() => getTheme(fontSize), [fontSize]);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -57,5 +67,13 @@ export default function App() {
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <FontSizeProvider>
+      <ThemedApp />
+    </FontSizeProvider>
   );
 }

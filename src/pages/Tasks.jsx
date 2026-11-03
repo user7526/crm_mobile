@@ -6,6 +6,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { listTasks, patchActivity } from '../api/crmApi';
 import { colors as c } from '../theme';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 const PAGE_SIZE = 50;
 
@@ -23,6 +24,7 @@ function isOverdue(t) {
 
 export default function Tasks() {
   const navigate = useNavigate();
+  const { fsPx } = useFontSize();
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
   const tasksRef = useRef([]);
@@ -96,7 +98,7 @@ export default function Tasks() {
                     label={t.task_status === 'closed' ? 'Closed' : t.task_status === 'on_hold' ? 'On hold' : 'Open'}
                     color={t.task_status === 'closed' ? 'success' : t.task_status === 'on_hold' ? 'warning' : 'default'}
                     variant="outlined"
-                    sx={{ height: 20, fontSize: 11 }}
+                    sx={{ height: 20, fontSize: fsPx(11) }}
                   />
                   {t.due_at && (
                     <Typography variant="caption" sx={{ color: overdue ? c.danger : c.muted, fontWeight: overdue ? 700 : 400, ml: 'auto' }}>

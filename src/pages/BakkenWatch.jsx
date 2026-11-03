@@ -15,6 +15,7 @@ import {
   listAiProposals, approveAiProposal, rejectAiProposal, updateAiProposal,
   listReferenceMaterials, getBakkenWatchCandidates,
 } from '../api/crmApi';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 const DAILY_REPORT_TAG = 'bakken_daily_report';
 
@@ -88,6 +89,7 @@ const reportMdComponents = {
 };
 
 export default function BakkenWatch() {
+  const { fsPx } = useFontSize();
   const [proposals, setProposals] = useState([]);
   const [proposalsLoading, setProposalsLoading] = useState(true);
   const [showAllStatuses, setShowAllStatuses] = useState(false);
@@ -259,7 +261,7 @@ export default function BakkenWatch() {
       {/* ---- Pending Reviews ---- */}
       <Paper variant="outlined" sx={{ p: 1.25 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: 15, flex: 1 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: fsPx(15), flex: 1 }}>
             Pending Reviews{pendingCount > 0 ? ` (${pendingCount})` : ''}
           </Typography>
           <IconButton size="small" onClick={() => loadProposals()}><RefreshIcon fontSize="small" /></IconButton>
@@ -309,7 +311,7 @@ export default function BakkenWatch() {
                     <Chip size="small" variant="outlined" label={p.tool_name} />
                     <Typography variant="caption" sx={{ color: c.muted }}>#{p.id} &middot; {fmtDateTime(p.created_at)}</Typography>
                   </Box>
-                  <Typography sx={{ fontSize: 14 }}>{p.summary}</Typography>
+                  <Typography sx={{ fontSize: fsPx(14) }}>{p.summary}</Typography>
                   {p.apply_result && (p.apply_result.error || p.apply_result.ok === false) && (
                     <Typography variant="caption" sx={{ color: '#c62828', display: 'block', mt: 0.5, fontWeight: 600 }}>
                       ⚠ Last attempt failed: {p.apply_result.error || JSON.stringify(p.apply_result)}
@@ -325,13 +327,13 @@ export default function BakkenWatch() {
                       {p.field_changes.map((fc, idx) => (
                         <Box
                           key={fc.field}
-                          sx={{ px: 1, py: 0.5, fontSize: 11, borderTop: idx === 0 ? 'none' : `1px solid ${c.border}` }}
+                          sx={{ px: 1, py: 0.5, fontSize: fsPx(11), borderTop: idx === 0 ? 'none' : `1px solid ${c.border}` }}
                         >
-                          <Typography sx={{ fontSize: 11, fontWeight: 600, color: c.muted }}>{fc.field}</Typography>
-                          <Typography sx={{ fontSize: 11, color: '#c62828', textDecoration: 'line-through', wordBreak: 'break-word' }}>
+                          <Typography sx={{ fontSize: fsPx(11), fontWeight: 600, color: c.muted }}>{fc.field}</Typography>
+                          <Typography sx={{ fontSize: fsPx(11), color: '#c62828', textDecoration: 'line-through', wordBreak: 'break-word' }}>
                             {fc.old || '(empty)'}
                           </Typography>
-                          <Typography sx={{ fontSize: 11, color: '#2e7d32', wordBreak: 'break-word' }}>
+                          <Typography sx={{ fontSize: fsPx(11), color: '#2e7d32', wordBreak: 'break-word' }}>
                             {fc.new || '(empty)'}
                           </Typography>
                         </Box>
@@ -344,7 +346,7 @@ export default function BakkenWatch() {
                     </AccordionSummary>
                     <AccordionDetails sx={{ px: 0 }}>
                       <Box component="pre" sx={{
-                        fontSize: 10, color: c.textSecondary, bgcolor: c.surface, p: 1, borderRadius: 1,
+                        fontSize: fsPx(10), color: c.textSecondary, bgcolor: c.surface, p: 1, borderRadius: 1,
                         overflow: 'auto', m: 0,
                       }}>
                         {JSON.stringify(p.tool_args, null, 2)}
@@ -386,7 +388,7 @@ export default function BakkenWatch() {
       {/* ---- Daily Reports archive ---- */}
       <Paper variant="outlined" sx={{ p: 1.25 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: 15, flex: 1 }}>Daily Reports</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: fsPx(15), flex: 1 }}>Daily Reports</Typography>
           <IconButton size="small" onClick={() => loadReports()}><RefreshIcon fontSize="small" /></IconButton>
           <IconButton size="small" onClick={() => setReportsCollapsed((v) => !v)}>
             <ExpandMoreIcon fontSize="small" sx={{ transform: reportsCollapsed ? 'rotate(-90deg)' : 'none' }} />
@@ -413,7 +415,7 @@ export default function BakkenWatch() {
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: fsPx(14), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {r.title}
                       </Typography>
                       <Typography variant="caption" sx={{ color: c.muted }}>{fmtDateTime(r.created_at)}</Typography>
@@ -452,7 +454,7 @@ export default function BakkenWatch() {
                         )}
                       </Box>
                     )}
-                    <Box sx={{ fontSize: 13 }}>
+                    <Box sx={{ fontSize: fsPx(13) }}>
                       <ReactMarkdown remarkPlugins={[remarkGfm]} components={reportMdComponents}>
                         {r.notes}
                       </ReactMarkdown>
@@ -486,7 +488,7 @@ export default function BakkenWatch() {
                                   {cand.company_name && <Chip size="small" variant="outlined" label={cand.company_name} />}
                                   {cand.confidence && <Typography variant="caption" sx={{ color: c.muted }}>{cand.confidence}</Typography>}
                                 </Box>
-                                <Typography sx={{ fontSize: 13 }}>{cand.source_event}</Typography>
+                                <Typography sx={{ fontSize: fsPx(13) }}>{cand.source_event}</Typography>
                                 {cand.justification && (
                                   <Typography variant="caption" sx={{ color: c.muted, display: 'block', mt: 0.5 }}>
                                     Why: {cand.justification}

@@ -11,6 +11,7 @@ import { colors as c } from '../theme';
 import { getAiwDesktopOrigin } from '../config';
 import PhoneLink from '../components/PhoneLink';
 import EmailLink from '../components/EmailLink';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 const ACTIVITY_TYPES = ['task', 'call', 'email', 'meeting', 'note'];
 
@@ -22,6 +23,7 @@ function fmtDateTime(iso) {
 export default function PartyDetail() {
   const { partyId } = useParams();
   const navigate = useNavigate();
+  const { fsPx } = useFontSize();
   const [loading, setLoading] = useState(true);
   const [party, setParty] = useState(null);
   const [tab, setTab] = useState(0);
@@ -140,10 +142,10 @@ export default function PartyDetail() {
             {(party.activities || []).map((act) => (
               <Paper key={act.activity_id} variant="outlined" sx={{ p: 1.25, mb: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
-                  <Chip size="small" label={act.activity_type} variant="outlined" sx={{ height: 20, fontSize: 11 }} />
+                  <Chip size="small" label={act.activity_type} variant="outlined" sx={{ height: 20, fontSize: fsPx(11) }} />
                   <Typography variant="caption" sx={{ color: c.muted }}>#{act.activity_id}</Typography>
-                  {act.task_status === 'closed' && <Chip size="small" label="Done" color="success" variant="outlined" sx={{ height: 20, fontSize: 11 }} />}
-                  {act.task_status === 'on_hold' && <Chip size="small" label="On hold" color="warning" variant="outlined" sx={{ height: 20, fontSize: 11 }} />}
+                  {act.task_status === 'closed' && <Chip size="small" label="Done" color="success" variant="outlined" sx={{ height: 20, fontSize: fsPx(11) }} />}
+                  {act.task_status === 'on_hold' && <Chip size="small" label="On hold" color="warning" variant="outlined" sx={{ height: 20, fontSize: fsPx(11) }} />}
                   <Typography variant="caption" sx={{ color: c.muted, ml: 'auto' }}>{fmtDateTime(act.created_at)}</Typography>
                 </Box>
                 {act.subject && <Typography sx={{ fontWeight: 600 }}>{act.subject}</Typography>}
@@ -174,7 +176,7 @@ export default function PartyDetail() {
                 <Box>
                   <Typography sx={{ fontWeight: 600 }}>
                     {[ct.first_name, ct.last_name].filter(Boolean).join(' ')}
-                    {ct.is_primary && <Chip size="small" label="Primary" sx={{ ml: 1, height: 18, fontSize: 10 }} />}
+                    {ct.is_primary && <Chip size="small" label="Primary" sx={{ ml: 1, height: 18, fontSize: fsPx(10) }} />}
                   </Typography>
                   {ct.title && <Typography variant="caption" sx={{ color: c.muted }}>{ct.title}</Typography>}
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.5 }}>

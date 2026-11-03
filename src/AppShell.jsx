@@ -8,9 +8,11 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import ForumIcon from '@mui/icons-material/Forum';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from './App';
 import { colors as c } from './theme';
 import { useMessaging } from './contexts/MessagingContext';
+import { useFontSize } from './contexts/FontSizeContext';
 import Parties from './pages/Parties';
 import PartyDetail from './pages/PartyDetail';
 import Contacts from './pages/Contacts';
@@ -19,6 +21,7 @@ import Import from './pages/Import';
 import BakkenWatch from './pages/BakkenWatch';
 import ChatList from './pages/ChatList';
 import ChatThread from './pages/ChatThread';
+import Settings from './pages/Settings';
 
 const TABS = [
   { path: '/', label: 'Parties', icon: <BusinessIcon /> },
@@ -34,6 +37,7 @@ export default function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const { totalUnread } = useMessaging();
+  const { fsPx } = useFontSize();
 
   // Bottom nav highlights by top-level path; party detail (/parties/:id)
   // still highlights the Parties tab since it's a drill-down from there.
@@ -47,15 +51,18 @@ export default function AppShell() {
       }}>
         <Toolbar variant="dense" sx={{ minHeight: 44 }}>
           <Typography sx={{
-            flex: 1, fontWeight: 700, fontSize: 16,
+            flex: 1, fontWeight: 700, fontSize: fsPx(16),
             color: import.meta.env.MODE !== 'production' ? '#000' : c.primary,
           }}>
             AIW CRM
           </Typography>
-          <Typography sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.6)' : c.muted, fontSize: 12, mr: 1 }}>
+          <Typography sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.6)' : c.muted, fontSize: fsPx(12), mr: 1 }}>
             {(user?.company_short_name || user?.company_name) ? `${user.company_short_name || user.company_name} · ` : ''}
             {user?.name || user?.email?.split('@')[0]}
           </Typography>
+          <IconButton size="small" onClick={() => navigate('/settings', { state: { from: location.pathname } })} sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.7)' : c.muted, mr: 0.5 }}>
+            <SettingsIcon fontSize="small" />
+          </IconButton>
           <IconButton size="small" onClick={logout} sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.7)' : c.muted }}>
             <LogoutIcon fontSize="small" />
           </IconButton>
@@ -72,6 +79,7 @@ export default function AppShell() {
           <Route path="chat/:conversationId" element={<ChatThread />} />
           <Route path="bakken-watch" element={<BakkenWatch />} />
           <Route path="import" element={<Import />} />
+          <Route path="settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Box>
@@ -82,7 +90,14 @@ export default function AppShell() {
           value={activeTab}
           onChange={(e, newValue) => navigate(TABS[newValue].path)}
           sx={{
+            px: 1,
             '& .Mui-selected': { color: c.primary },
+            // The outermost tabs' icons/labels otherwise sit flush against
+            // the screen edge (no built-in side padding on BottomNavigation)
+            // -- give the first/last action a little breathing room instead
+            // of crowding the corner (2026-11-03).
+            '& .MuiBottomNavigationAction-root:first-of-type': { pl: 0.5 },
+            '& .MuiBottomNavigationAction-root:last-of-type': { pr: 0.5 },
           }}
         >
           {TABS.map((t) => (

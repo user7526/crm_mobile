@@ -10,6 +10,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { colors as c } from '../theme';
 import { useMessaging } from '../contexts/MessagingContext';
 import messagingApi from '../api/messagingApi';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 const ACCEPTED_EXTENSIONS = ['.pdf', '.xlsx', '.xls', '.csv', '.docx', '.doc', '.txt', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
 
@@ -21,6 +22,7 @@ function formatTime(ts) {
 }
 
 function Attachment({ conversationId, message, mine }) {
+  const { fsPx } = useFontSize();
   const mime = message.attachment_mime || '';
   const isImage = mime.startsWith('image/');
   const [url, setUrl] = useState(null);
@@ -58,7 +60,7 @@ function Attachment({ conversationId, message, mine }) {
       onClick={openFile}
       sx={{
         display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', mt: message.body ? 0.5 : 0,
-        color: mine ? '#fff' : c.primary, textDecoration: 'underline', fontSize: 13,
+        color: mine ? '#fff' : c.primary, textDecoration: 'underline', fontSize: fsPx(13),
       }}
     >
       <InsertDriveFileIcon fontSize="small" />
@@ -72,6 +74,7 @@ export default function ChatThread() {
   const convId = Number(conversationId);
   const navigate = useNavigate();
   const { currentUserId, subscribeToMessages, setActiveConversationId, refreshConversations, conversations } = useMessaging();
+  const { fsPx } = useFontSize();
 
   const [title, setTitle] = useState('');
   const [messages, setMessages] = useState([]);
@@ -174,7 +177,7 @@ export default function ChatThread() {
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}><CircularProgress size={22} /></Box>
         ) : messages.length === 0 ? (
-          <Typography sx={{ color: c.muted, fontSize: 13, textAlign: 'center', mt: 2 }}>
+          <Typography sx={{ color: c.muted, fontSize: fsPx(13), textAlign: 'center', mt: 2 }}>
             No messages yet. Say hello!
           </Typography>
         ) : (
@@ -185,12 +188,12 @@ export default function ChatThread() {
                 <Box sx={{ maxWidth: '78%' }}>
                   <Box sx={{
                     bgcolor: mine ? c.primary : c.surface, color: mine ? '#fff' : c.text,
-                    borderRadius: 2, px: 1.25, py: 0.75, fontSize: 14, wordBreak: 'break-word',
+                    borderRadius: 2, px: 1.25, py: 0.75, fontSize: fsPx(14), wordBreak: 'break-word',
                   }}>
                     {msg.body}
                     {msg.attachment_filename && <Attachment conversationId={convId} message={msg} mine={mine} />}
                   </Box>
-                  <Typography sx={{ fontSize: 10, color: c.muted, mt: 0.25, textAlign: mine ? 'right' : 'left' }}>
+                  <Typography sx={{ fontSize: fsPx(10), color: c.muted, mt: 0.25, textAlign: mine ? 'right' : 'left' }}>
                     {formatTime(msg.created_at)}
                   </Typography>
                 </Box>
@@ -206,7 +209,7 @@ export default function ChatThread() {
         <IconButton size="small" onClick={pickFile}><AttachFileIcon fontSize="small" /></IconButton>
         <Box sx={{ flex: 1 }}>
           {file && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5, fontSize: 12, color: c.muted }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5, fontSize: fsPx(12), color: c.muted }}>
               <InsertDriveFileIcon fontSize="small" /> {file.name}
               <Box component="span" onClick={() => setFile(null)} sx={{ cursor: 'pointer', ml: 0.5, color: c.danger }}>✕</Box>
             </Box>

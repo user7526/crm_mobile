@@ -11,11 +11,13 @@ import { listContacts } from '../api/crmApi';
 import { colors as c } from '../theme';
 import PhoneLink from '../components/PhoneLink';
 import EmailLink from '../components/EmailLink';
+import { useFontSize } from '../contexts/FontSizeContext';
 
 const PAGE_SIZE = 50;
 
 export default function Contacts() {
   const navigate = useNavigate();
+  const { fsPx } = useFontSize();
   const [q, setQ] = useState('');
   const [qDebounced, setQDebounced] = useState('');
   const debounceRef = useRef(null);
@@ -100,9 +102,9 @@ export default function Contacts() {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.25 }}>
                       {ct.party_legal_name && <Typography variant="caption" sx={{ color: c.muted }}>{ct.party_legal_name}</Typography>}
                       {ct.title && <Typography variant="caption" sx={{ color: c.muted }}>{ct.title}</Typography>}
-                      {ct.phone && <PhoneLink value={ct.phone} sx={{ fontSize: 13 }} />}
-                      {ct.phone_office && <PhoneLink value={ct.phone_office} sx={{ fontSize: 13 }} />}
-                      {ct.email && <EmailLink value={ct.email} partyId={ct.party_id} contactId={ct.contact_id} sx={{ fontSize: 13 }} />}
+                      {ct.phone && <PhoneLink value={ct.phone} sx={{ fontSize: fsPx(13) }} />}
+                      {ct.phone_office && <PhoneLink value={ct.phone_office} sx={{ fontSize: fsPx(13) }} />}
+                      {ct.email && <EmailLink value={ct.email} partyId={ct.party_id} contactId={ct.contact_id} sx={{ fontSize: fsPx(13) }} />}
                     </Box>
                   }
                 />
