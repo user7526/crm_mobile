@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, IconButton, AppBar, Toolbar, Paper } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { colors as c } from '../theme';
@@ -7,14 +7,19 @@ import { useFontSize } from '../contexts/FontSizeContext';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { fontSize, setFontSize, MIN_FONT_SIZE, MAX_FONT_SIZE, fs } = useFontSize();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: c.bg }}>
       <AppBar position="static" elevation={0} sx={{ bgcolor: c.surface, borderBottom: `1px solid ${c.border}` }}>
         <Toolbar variant="dense" sx={{ minHeight: 44 }}>
-          <IconButton size="small" onClick={() => navigate(location.state?.from || '/')} sx={{ color: c.muted, mr: 1 }}>
+          {/* navigate(-1), not a path (task #443, 2026-11-04): the gear
+              icon always PUSHES a new /settings history entry (see
+              AppShell.jsx), so popping back here is correct and keeps
+              the native/PWA back gesture unwinding the real stack
+              afterward instead of bouncing between this page and
+              wherever Settings was opened from. */}
+          <IconButton size="small" onClick={() => navigate(-1)} sx={{ color: c.muted, mr: 1 }}>
             <ArrowBackIcon fontSize="small" />
           </IconButton>
           <Typography sx={{ flex: 1, fontWeight: 700, fontSize: fs(1), color: c.primary }}>

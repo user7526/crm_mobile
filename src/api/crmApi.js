@@ -56,6 +56,19 @@ export async function createActivity(partyId, body) {
   return asJson(res);
 }
 
+// AI-A task #471 (2026-11-07): mirrors ai_ui_react's CrmParties.js addContact
+// -- POST /api/crm/parties/{id}/contacts -- there was previously no way to
+// add a contact from mobile at all (PartyDetail.jsx's Contacts tab only
+// listed existing contacts).
+export async function createContact(partyId, body) {
+  const res = await authFetch(`${API_BASE_URL}/api/crm/parties/${partyId}/contacts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return asJson(res);
+}
+
 export async function patchActivity(partyId, activityId, body) {
   const res = await authFetch(`${API_BASE_URL}/api/crm/parties/${partyId}/activities/${activityId}`, {
     method: 'PATCH',

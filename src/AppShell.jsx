@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, IconButton, BottomNavigation, BottomNavigationAction, Paper, Badge } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, IconButton, Paper, Badge } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
@@ -41,7 +41,14 @@ export default function AppShell() {
 
   // Bottom nav highlights by top-level path; party detail (/parties/:id)
   // still highlights the Parties tab since it's a drill-down from there.
-  const activeTab = TABS.findIndex((t) => (t.path === '/' ? location.pathname === '/' || location.pathname.startsWith('/parties') : location.pathname.startsWith(t.path)));
+  const activeTabPath = TABS.find((t) => (t.path === '/' ? location.pathname === '/' || location.pathname.startsWith('/parties') : location.pathname.startsWith(t.path)))?.path;
+
+  // Two fixed rows instead of one single row (task #442, 2026-11-04):
+  // mirrors ai_assistant's mobile nav (frontend/src/mobile/MobileLayout.js)
+  // -- splits the tab list evenly, row 1 filling left-to-right first then
+  // row 2, so reading order still matches TABS' own order.
+  const navRowSplit = Math.ceil(TABS.length / 2);
+  const navRows = [TABS.slice(0, navRowSplit), TABS.slice(navRowSplit)];
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh', bgcolor: c.bg }}>
@@ -60,7 +67,7 @@ export default function AppShell() {
             {(user?.company_short_name || user?.company_name) ? `${user.company_short_name || user.company_name} · ` : ''}
             {user?.name || user?.email?.split('@')[0]}
           </Typography>
-          <IconButton size="small" onClick={() => navigate('/settings', { state: { from: location.pathname } })} sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.7)' : c.muted, mr: 0.5 }}>
+          <IconButton size="small" onClick={() => navigate('/settings')} sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.7)' : c.muted, mr: 0.5 }}>
             <SettingsIcon fontSize="small" />
           </IconButton>
           <IconButton size="small" onClick={logout} sx={{ color: import.meta.env.MODE !== 'production' ? 'rgba(0,0,0,0.7)' : c.muted }}>
@@ -84,32 +91,47 @@ export default function AppShell() {
         </Routes>
       </Box>
 
-      <Paper elevation={3} sx={{ flexShrink: 0 }}>
-        <BottomNavigation
-          showLabels
-          value={activeTab}
-          onChange={(e, newValue) => navigate(TABS[newValue].path)}
-          sx={{
-            px: 1,
-            '& .Mui-selected': { color: c.primary },
-            // The outermost tabs' icons/labels otherwise sit flush against
-            // the screen edge (no built-in side padding on BottomNavigation)
-            // -- give the first/last action a little breathing room instead
-            // of crowding the corner (2026-11-03).
-            '& .MuiBottomNavigationAction-root:first-of-type': { pl: 0.5 },
-            '& .MuiBottomNavigationAction-root:last-of-type': { pr: 0.5 },
-          }}
-        >
-          {TABS.map((t) => (
-            <BottomNavigationAction
-              key={t.path}
-              label={t.label}
-              icon={t.path === '/chat' ? (
-                <Badge color="error" badgeContent={totalUnread} max={99}>{t.icon}</Badge>
-              ) : t.icon}
-            />
-          ))}
-        </BottomNavigation>
+      {/* Two-row bottom nav (task #442, 2026-11-04), replacing the old
+          single-row MUI BottomNavigation -- 6 tabs in one row were
+          crowding/clipping at the screen edges. Horizontal padding plus
+          the safe-area bottom inset keep every tap target (especially the
+          bottom row's leftmost/rightmost buttons) clear of the physical
+          curved screen corners, rather than sitting flush against them. */}
+      <Paper elevation={3} sx={{ flexShrink: 0, px: 1.5, pb: 'env(safe-area-inset-bottom)' }}>
+        {navRows.map((rowTabs, rowIdx) => (
+          <Box key={rowIdx} sx={{ display: 'flex', width: '100%' }}>
+            {rowTabs.map((t) => {
+              const selected = t.path === activeTabPath;
+              return (
+                <Box
+                  key={t.path}
+                  component="button"
+                  type="button"
+                  onClick={() => navigate(t.path)}
+                  sx={{
+                    flex: 1, minWidth: 0, border: 'none', background: 'none', p: 0, m: 0,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    py: 0.75, gap: 0.25, cursor: 'pointer', fontFamily: 'inherit',
+                    color: selected ? c.primary : c.muted,
+                    '&:focus-visible': { outline: '2px solid', outlineColor: c.primary, outlineOffset: -2 },
+                  }}
+                >
+                  {t.path === '/chat' ? (
+                    <Badge color="error" badgeContent={totalUnread} max={99}>{t.icon}</Badge>
+                  ) : t.icon}
+                  <Typography
+                    sx={{
+                      fontSize: fsPx(11), lineHeight: 1.2, color: 'inherit',
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+                    }}
+                  >
+                    {t.label}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+        ))}
       </Paper>
     </Box>
   );

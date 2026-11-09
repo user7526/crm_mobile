@@ -66,30 +66,44 @@ function fmtDateTime(iso) {
 // remark-gfm pairing as desktop's CrmBakkenWatch.js, restyled for the light
 // mobile theme (desktop forces white text for its dark surface; this app
 // only has a light theme, so plain default colors read fine here).
-const reportMdComponents = {
-  table: ({ children }) => (
-    <table style={{ borderCollapse: 'collapse', width: '100%', margin: '6px 0', fontSize: '12px' }}>{children}</table>
-  ),
-  tr: ({ children }) => <tr style={{ borderBottom: `1px solid ${c.border}` }}>{children}</tr>,
-  th: ({ children }) => (
-    <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 600, fontSize: '12px', borderBottom: `2px solid ${c.border}` }}>{children}</th>
-  ),
-  td: ({ children }) => <td style={{ padding: '3px 6px', fontSize: '12px', borderBottom: `1px solid ${c.border}` }}>{children}</td>,
-  h1: ({ children }) => <h1 style={{ fontSize: '19px', fontWeight: 700, margin: '10px 0 6px' }}>{children}</h1>,
-  h2: ({ children }) => <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '10px 0 4px' }}>{children}</h2>,
-  h3: ({ children }) => <h3 style={{ fontSize: '14px', fontWeight: 600, margin: '8px 0 3px' }}>{children}</h3>,
-  h4: ({ children }) => <h4 style={{ fontSize: '13px', fontWeight: 600, margin: '6px 0 2px' }}>{children}</h4>,
-  p: ({ children }) => <p style={{ margin: '4px 0', lineHeight: 1.5 }}>{children}</p>,
-  hr: () => <hr style={{ border: 'none', borderTop: `1px solid ${c.border}`, margin: '8px 0' }} />,
-  ul: ({ children }) => <ul style={{ margin: '4px 0', paddingLeft: '1.4em' }}>{children}</ul>,
-  ol: ({ children }) => <ol style={{ margin: '4px 0', paddingLeft: '1.4em' }}>{children}</ol>,
-  li: ({ children }) => <li style={{ marginBottom: '2px' }}>{children}</li>,
-  a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: c.primary }}>{children}</a>,
-  strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
-};
+//
+// AI-A task #475 (2026-11-07): this used to be a plain module-level object
+// with hardcoded px font sizes. The wrapping <Box sx={{ fontSize: fsPx(13) }}>
+// around <ReactMarkdown> (below) scales *inherited* text fine via the CSS
+// cascade -- that's why plain paragraph/list text already tracked the font
+// size setting -- but table/th/td/h1-h4 explicitly set their own `fontSize`,
+// which breaks out of that inheritance and pinned those elements (including
+// every section title, since the reports use markdown headers) at a fixed
+// size no matter what the slider was set to. Turned into a factory function
+// that takes the live `fsPx` so every element -- not just the ones that
+// happened to inherit -- actually scales.
+function getReportMdComponents(fsPx) {
+  return {
+    table: ({ children }) => (
+      <table style={{ borderCollapse: 'collapse', width: '100%', margin: '6px 0', fontSize: fsPx(12) }}>{children}</table>
+    ),
+    tr: ({ children }) => <tr style={{ borderBottom: `1px solid ${c.border}` }}>{children}</tr>,
+    th: ({ children }) => (
+      <th style={{ padding: '4px 6px', textAlign: 'left', fontWeight: 600, fontSize: fsPx(12), borderBottom: `2px solid ${c.border}` }}>{children}</th>
+    ),
+    td: ({ children }) => <td style={{ padding: '3px 6px', fontSize: fsPx(12), borderBottom: `1px solid ${c.border}` }}>{children}</td>,
+    h1: ({ children }) => <h1 style={{ fontSize: fsPx(19), fontWeight: 700, margin: '10px 0 6px' }}>{children}</h1>,
+    h2: ({ children }) => <h2 style={{ fontSize: fsPx(16), fontWeight: 700, margin: '10px 0 4px' }}>{children}</h2>,
+    h3: ({ children }) => <h3 style={{ fontSize: fsPx(14), fontWeight: 600, margin: '8px 0 3px' }}>{children}</h3>,
+    h4: ({ children }) => <h4 style={{ fontSize: fsPx(13), fontWeight: 600, margin: '6px 0 2px' }}>{children}</h4>,
+    p: ({ children }) => <p style={{ margin: '4px 0', lineHeight: 1.5 }}>{children}</p>,
+    hr: () => <hr style={{ border: 'none', borderTop: `1px solid ${c.border}`, margin: '8px 0' }} />,
+    ul: ({ children }) => <ul style={{ margin: '4px 0', paddingLeft: '1.4em' }}>{children}</ul>,
+    ol: ({ children }) => <ol style={{ margin: '4px 0', paddingLeft: '1.4em' }}>{children}</ol>,
+    li: ({ children }) => <li style={{ marginBottom: '2px' }}>{children}</li>,
+    a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: c.primary }}>{children}</a>,
+    strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+  };
+}
 
 export default function BakkenWatch() {
   const { fsPx } = useFontSize();
+  const reportMdComponents = React.useMemo(() => getReportMdComponents(fsPx), [fsPx]);
   const [proposals, setProposals] = useState([]);
   const [proposalsLoading, setProposalsLoading] = useState(true);
   const [showAllStatuses, setShowAllStatuses] = useState(false);
@@ -415,7 +429,12 @@ export default function BakkenWatch() {
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 600, fontSize: fsPx(14), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {/* Word-wrap instead of single-line ellipsis truncation
+                          (task #444, 2026-11-04): at larger font-size
+                          settings this was clipping report titles down to
+                          just a few words, silently dropping the date that
+                          makes each report distinguishable in the list. */}
+                      <Typography sx={{ fontWeight: 600, fontSize: fsPx(14), wordBreak: 'break-word' }}>
                         {r.title}
                       </Typography>
                       <Typography variant="caption" sx={{ color: c.muted }}>{fmtDateTime(r.created_at)}</Typography>

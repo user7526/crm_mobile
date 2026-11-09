@@ -6,11 +6,12 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getParty, createActivity, patchActivity } from '../api/crmApi';
+import { getParty, createActivity, patchActivity, createContact } from '../api/crmApi';
 import { colors as c } from '../theme';
 import { getAiwDesktopOrigin } from '../config';
 import PhoneLink from '../components/PhoneLink';
 import EmailLink from '../components/EmailLink';
+import CollapsibleAddSection from '../components/CollapsibleAddSection';
 import { useFontSize } from '../contexts/FontSizeContext';
 
 const ACTIVITY_TYPES = ['task', 'call', 'email', 'meeting', 'note'];
@@ -29,6 +30,12 @@ export default function PartyDetail() {
   const [tab, setTab] = useState(0);
   const [form, setForm] = useState({ activity_type: 'note', subject: '', body: '', contact_id: '' });
   const [saving, setSaving] = useState(false);
+  // AI-A task #471 (2026-11-07): "New contact" form -- mirrors desktop's
+  // CrmParties.js contactForm, previously missing from mobile entirely.
+  const [contactForm, setContactForm] = useState({
+    first_name: '', last_name: '', title: '', email: '', phone: '', phone_office: '', notes: '',
+  });
+  const [contactSaving, setContactSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -65,6 +72,21 @@ export default function PartyDetail() {
     }
   };
 
+  const submitContact = async () => {
+    if (!contactForm.first_name.trim() && !contactForm.last_name.trim() && !contactForm.email.trim() && !contactForm.phone.trim()) return;
+    setContactSaving(true);
+    try {
+      await createContact(partyId, contactForm);
+      setContactForm({ first_name: '', last_name: '', title: '', email: '', phone: '', phone_office: '', notes: '' });
+      load();
+    } catch (e) {
+      // eslint-disable-next-line no-alert
+      alert(e.message || 'Failed to add contact');
+    } finally {
+      setContactSaving(false);
+    }
+  };
+
   const toggleTaskStatus = async (act) => {
     const next = act.task_status === 'closed' ? 'open' : 'closed';
     try {
@@ -82,13 +104,28 @@ export default function PartyDetail() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.25, borderBottom: `1px solid ${c.border}`, flexShrink: 0 }}>
-        <IconButton size="small" onClick={() => navigate(-1)}><ArrowBackIcon /></IconButton>
+      {/* alignItems: flex-start + removed ellipsis truncation on the
+          company name (task #444, 2026-11-04) -- long legal names were
+          getting clipped, worse at larger font-size settings; now
+          wraps, with the back button pinned to the top. */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.25, borderBottom: `1px solid ${c.border}`, flexShrink: 0 }}>
+        <IconButton size="small" onClick={() => navigate(-1)} sx={{ mt: -0.5 }}><ArrowBackIcon /></IconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Typography sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
             {party.legal_name}
           </Typography>
           {party.dba_name && <Typography variant="caption" sx={{ color: c.muted }}>{party.dba_name}</Typography>}
+          {/* AI-A task #400 (2026-11-07, mobile follow-up): mirrors desktop's
+              CrmParties.js "Also known as:" chip row -- was added to desktop
+              only in the first pass of this task. */}
+          {Array.isArray(party.known_aliases) && party.known_aliases.length > 0 && (
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5, flexWrap: 'wrap', mt: 0.3 }}>
+              <Typography variant="caption" sx={{ color: c.muted, mt: 0.3 }}>Also known as:</Typography>
+              {party.known_aliases.map((alias) => (
+                <Chip key={alias} size="small" label={alias} variant="outlined" />
+              ))}
+            </Box>
+          )}
         </Box>
         <IconButton
           size="small"
@@ -114,7 +151,7 @@ export default function PartyDetail() {
       <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
         {tab === 0 && (
           <>
-            <Paper variant="outlined" sx={{ p: 1.25, mb: 2 }}>
+            <CollapsibleAddSection label="Log activity">
               <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <Select size="small" value={form.activity_type} onChange={(e) => setForm((f) => ({ ...f, activity_type: e.target.value }))}>
                   {ACTIVITY_TYPES.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
@@ -137,7 +174,7 @@ export default function PartyDetail() {
               <Button size="small" variant="contained" onClick={submitActivity} disabled={saving} fullWidth>
                 {saving ? <CircularProgress size={18} /> : 'Save to timeline'}
               </Button>
-            </Paper>
+            </CollapsibleAddSection>
 
             {(party.activities || []).map((act) => (
               <Paper key={act.activity_id} variant="outlined" sx={{ p: 1.25, mb: 1 }}>
@@ -170,6 +207,20 @@ export default function PartyDetail() {
 
         {tab === 1 && (
           <Box>
+            <CollapsibleAddSection label="New contact">
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                <TextField size="small" label="First" value={contactForm.first_name} onChange={(e) => setContactForm((f) => ({ ...f, first_name: e.target.value }))} />
+                <TextField size="small" label="Last" value={contactForm.last_name} onChange={(e) => setContactForm((f) => ({ ...f, last_name: e.target.value }))} />
+                <TextField size="small" label="Title" value={contactForm.title} onChange={(e) => setContactForm((f) => ({ ...f, title: e.target.value }))} sx={{ gridColumn: '1 / -1' }} />
+                <TextField size="small" label="Email" value={contactForm.email} onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))} />
+                <TextField size="small" label="Mobile" value={contactForm.phone} onChange={(e) => setContactForm((f) => ({ ...f, phone: e.target.value }))} />
+                <TextField size="small" label="Office" value={contactForm.phone_office} onChange={(e) => setContactForm((f) => ({ ...f, phone_office: e.target.value }))} />
+                <TextField size="small" label="Notes" value={contactForm.notes} onChange={(e) => setContactForm((f) => ({ ...f, notes: e.target.value }))} multiline minRows={2} sx={{ gridColumn: '1 / -1' }} />
+              </Box>
+              <Button size="small" variant="contained" onClick={submitContact} disabled={contactSaving} sx={{ mt: 1 }} fullWidth>
+                {contactSaving ? <CircularProgress size={18} /> : 'Add contact'}
+              </Button>
+            </CollapsibleAddSection>
             {(party.contacts || []).map((ct, idx) => (
               <React.Fragment key={ct.contact_id}>
                 {idx > 0 && <Divider sx={{ my: 1 }} />}

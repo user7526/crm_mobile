@@ -166,9 +166,15 @@ export default function ChatThread() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.25, borderBottom: `1px solid ${c.border}`, flexShrink: 0 }}>
-        <IconButton size="small" onClick={() => navigate('/chat')}><ArrowBackIcon /></IconButton>
-        <Typography sx={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      {/* alignItems: flex-start (not center) + removed the ellipsis
+          truncation (task #444, 2026-11-04) -- at larger font-size
+          settings a long conversation title was getting silently
+          cut off; now it wraps onto a second line instead, with the
+          back button pinned to the top rather than re-centering
+          against a taller header. */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.25, borderBottom: `1px solid ${c.border}`, flexShrink: 0 }}>
+        <IconButton size="small" onClick={() => navigate('/chat')} sx={{ mt: -0.5 }}><ArrowBackIcon /></IconButton>
+        <Typography sx={{ fontWeight: 700, wordBreak: 'break-word' }}>
           {title || 'Conversation'}
         </Typography>
       </Box>
