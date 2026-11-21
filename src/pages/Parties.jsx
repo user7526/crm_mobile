@@ -34,6 +34,9 @@ const ROLE_OPTIONS = [
   { value: 'exporter_prospect', label: 'Exporter prospect' },
   { value: 'competitor', label: 'Competitor' },
   { value: 'other', label: 'Other' },
+  // Migration 229 (2026-11-21): a party that provides/holds capital rather
+  // than operating/building/supplying. Not a prospect-pipeline stage.
+  { value: 'investor', label: 'Investor' },
   { value: 'project', label: 'Project' },
   { value: 'event', label: 'Event' },
 ];
