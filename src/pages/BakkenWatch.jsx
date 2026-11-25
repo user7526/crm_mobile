@@ -339,6 +339,11 @@ export default function BakkenWatch() {
                       Target: {p.target_label}
                     </Typography>
                   )}
+                  {Array.isArray(p.depends_on) && p.depends_on.length > 0 && (
+                    <Typography variant="caption" sx={{ color: '#ef6c00', display: 'block', mt: 0.5, fontWeight: 600 }}>
+                      ⏳ Depends on pending {p.depends_on.map((d) => `#${d.proposal_id} (${d.label})`).join(', ')} -- approve that first
+                    </Typography>
+                  )}
                   {Array.isArray(p.field_changes) && p.field_changes.length > 0 && (
                     <Box sx={{ mt: 0.75, border: `1px solid ${c.border}`, borderRadius: 1, overflow: 'hidden' }}>
                       {p.field_changes.map((fc, idx) => (
